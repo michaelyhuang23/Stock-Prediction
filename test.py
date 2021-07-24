@@ -1,0 +1,1 @@
+print('VNO^K'.isalpha())
