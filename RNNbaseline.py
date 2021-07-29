@@ -26,6 +26,15 @@ class RecurrentAnalyzer(nn.Module):
         self.input_size = input_size
         self.output_size = output_size
         self.recurrent_size = recurrent_size
+
+    def forward_step(self, input):
+        '''
+        input is of shape (N, input_size)
+        output is of shape (N, output_size)
+        '''
+        output = self.rnn_cell(input)
+        output = self.regressor2(self.relu(self.regressor1(output)))
+        return output
     
     def forward(self, inputs):
         '''

@@ -14,7 +14,7 @@ database = StockDatabase()
 database.read_data()
 #print(database.stock_data.shape)
 #print(database.stock_data[:10,-10:])
-model = RecurrentAnalyzer(100).to(device)
+model = RecurrentAnalyzer(512).to(device)
 optimizer = Adam(params=model.parameters(),lr=0.0005)
 loss_fn = nn.MSELoss()
 
