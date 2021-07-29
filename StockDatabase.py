@@ -4,6 +4,7 @@ from typing import List
 import os.path
 import pickle
 import numpy as np
+from datetime import datetime, timedelta
 
 class StockDatabase:
     def __init__(self) -> None:
@@ -46,7 +47,7 @@ class StockDatabase:
         batch_size = 100
         for i in range(len(symbols)//batch_size):
             batch = symbols[i*batch_size : min(len(symbols),(i+1)*batch_size)]
-            data = yf.download(batch, period='1y', interval='1d', threads=True)
+            data = yf.download(batch, period='5d', interval='15m', threads=True)
             stock_data.append(data['Open'].to_numpy()[:lim_size])
             print(f'reading {(i+1)*batch_size}th stock')
         #data = yf.download(symbols, period='1y', interval='1d',threads=False)
@@ -72,11 +73,25 @@ class StockDatabase:
         np.random.shuffle(data)
         return np.transpose(data)
 
+    def get_stock_prices(self, symbol : str, length : int):
+        '''
+        length should be in 15-mins
+        '''
+        start = datetime.now()-timedelta(minutes=length*15)
+        start = start.strftime("%Y-%m-%d")
+        print(start)
+        data = yf.Ticker(symbol).history(interval='15m',start=start)
+        data = data['Open'].to_numpy()
+        return data.astype(np.float32)
+
+
             
 
 
                 
 # database = StockDatabase()
+# database.read_stock()
+# database.save_data()
 # database.read_data()
 # database.stock_data = np.nan_to_num(database.stock_data)
 # # print(database.stock_data[:10,-10:])

@@ -14,12 +14,12 @@ database = StockDatabase()
 database.read_data()
 #print(database.stock_data.shape)
 #print(database.stock_data[:10,-10:])
-model = RecurrentAnalyzer(50).to(device)
+model = RecurrentAnalyzer(100).to(device)
 optimizer = Adam(params=model.parameters(),lr=0.0005)
 loss_fn = nn.MSELoss()
 
 minLoss = 1e9
-EPOCH = 5000
+EPOCH = 100
 batch_size = 64
 val_split = 0.2
 length = 100
@@ -39,16 +39,16 @@ for epoch in range(EPOCH):
         batch_data = train_data[:, batch_i*batch_size : (batch_i+1)*batch_size]
         #print(batch_data[:-1,...].shape)
         preds = model(batch_data[:-1,...])
-        #print(preds)
         loss = loss_fn(preds,batch_data[1:]) 
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
+        #print(model.rnn_cell.hiddenDense.weight.grad)
         lossSum+=loss.detach().item()
     lossSum/=(train_len//batch_size)
     print(f'training epoch {epoch}/{EPOCH}; loss: {lossSum}')
     writer.add_scalar('Loss/train', lossSum, epoch)
-    if epoch % 20 == 0:
+    if (epoch+1) % 20 == 0:
         model.eval()
         with torch.no_grad():
             #print(val_data.shape)
