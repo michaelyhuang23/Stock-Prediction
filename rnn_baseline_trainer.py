@@ -14,15 +14,15 @@ database = StockDatabase()
 database.read_data()
 #print(database.stock_data.shape)
 #print(database.stock_data[:10,-10:])
-model = RecurrentAnalyzer(512).to(device)
-optimizer = Adam(params=model.parameters(),lr=0.0005)
+model = RecurrentAnalyzer(100).to(device)
+optimizer = SGD(model.parameters(),lr=0.05,momentum=0.1)
 loss_fn = nn.MSELoss()
 
 minLoss = 1e9
 EPOCH = 100
 batch_size = 64
 val_split = 0.2
-length = 100
+length = 235
 train_data = torch.tensor(database.to_data(length))
 #print(train_data[:10,:10])
 train_len = int((1-val_split)*train_data.shape[1])

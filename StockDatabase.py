@@ -42,13 +42,18 @@ class StockDatabase:
         self.stock_data = np.load(dir_path+'/stock_data.npy').astype(np.float32)
         self.symbol_set = set(self.stock_symbols)
     
-    def load_stocks(self, symbols : List, lim_size : int = 250):
+    def load_stocks(self, symbols : List, size : int = 470):
         stock_data = []
         batch_size = 100
         for i in range(len(symbols)//batch_size):
             batch = symbols[i*batch_size : min(len(symbols),(i+1)*batch_size)]
-            data = yf.download(batch, period='5d', interval='15m', threads=True)
-            stock_data.append(data['Open'].to_numpy()[:lim_size])
+            data = yf.download(batch, period='1mo', interval='15m', threads=True)
+            data = data['Open'].to_numpy()[:size]
+            print(data.shape)
+            if len(data)<size:
+                data = np.pad(data,((0,size-len(data)),(0,0)),'constant',constant_values=0)
+            print(data.shape)
+            stock_data.append(data)
             print(f'reading {(i+1)*batch_size}th stock')
         #data = yf.download(symbols, period='1y', interval='1d',threads=False)
         self.stock_data = np.nan_to_num(np.transpose(np.concatenate(stock_data,axis=1)).astype(np.float32))
@@ -84,14 +89,11 @@ class StockDatabase:
         data = data['Open'].to_numpy()
         return data.astype(np.float32)
 
-
-            
-
-
                 
 # database = StockDatabase()
 # database.read_stock()
 # database.save_data()
+
 # database.read_data()
 # database.stock_data = np.nan_to_num(database.stock_data)
 # # print(database.stock_data[:10,-10:])

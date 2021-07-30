@@ -1,9 +1,9 @@
 import torch
 from torch import nn
 
-class RecurrentNeuron(nn.Module):
+class RCell(nn.Module):
     def __init__(self, input_size, recurrent_size, hidden = None):
-        super(RecurrentNeuron, self).__init__()
+        super(RCell, self).__init__()
         self.hiddenDense = nn.Linear(recurrent_size, recurrent_size)
         self.currentDense = nn.Linear(input_size, recurrent_size)
         self.tanh = nn.Tanh()
@@ -19,7 +19,7 @@ class RecurrentNeuron(nn.Module):
 class RecurrentAnalyzer(nn.Module):
     def __init__(self, recurrent_size, input_size=1, output_size=1):
         super(RecurrentAnalyzer, self).__init__()
-        self.rnn_cell = RecurrentNeuron(input_size, recurrent_size)
+        self.rnn_cell = RCell(input_size, recurrent_size)
         self.regressor1 = nn.Linear(recurrent_size,recurrent_size)
         self.regressor2 = nn.Linear(recurrent_size,output_size)
         self.relu = nn.ReLU()
