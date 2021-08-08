@@ -60,9 +60,13 @@ class StockDatabase:
         print(self.stock_data.shape)
     
     def normalize(self, data):
-        mean = np.mean(data,axis=0)
-        std = np.std(data,axis=0)
-        data -= mean
+        mask = data>0.01
+        new_dat = data[mask]
+        minv = np.min(new_dat,axis=0)
+        std = np.std(new_dat,axis=0)
+        # print(minv,std)
+        # print(np.min(data,axis=0),np.std(data,axis=0))
+        data[mask] -= minv
         if std != 0:
             data /=std
         return data
@@ -73,6 +77,7 @@ class StockDatabase:
             total_len = len(stock)
             for i in range(total_len//length):
                 if stock[i*length]>1e-9:
+                    print(np.min(stock[i*length : (i+1)*length]))
                     data.append(self.normalize(stock[i*length : (i+1)*length])[None,...])
         data = np.concatenate(data,axis=0)
         np.random.shuffle(data)

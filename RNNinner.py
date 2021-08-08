@@ -10,7 +10,8 @@ class RCell_complex(nn.Module):
         self.hiddenPrep = nn.Linear(recurrent_size, recurrent_size)
         self.currentPrep = nn.Linear(input_size, inter_size)
         self.meshup = nn.Linear(recurrent_size+inter_size, recurrent_size)
-        self.hiddenPost = nn.Linear(recurrent_size, recurrent_size)
+        self.hiddenPost1 = nn.Linear(recurrent_size, recurrent_size)
+        self.hiddenPost2 = nn.Linear(recurrent_size, recurrent_size)
         self.tanh = nn.Tanh()
         self.hidden = hidden
         self.recurrent_size = recurrent_size
@@ -18,13 +19,15 @@ class RCell_complex(nn.Module):
     def forward(self, input):
         if self.hidden is None:
             self.hidden = torch.zeros((input.shape[0],self.recurrent_size))
-        self.hidden = self.tanh(self.hiddenPost(self.tanh(self.meshup(self.tanh(torch.cat([self.hiddenPrep(self.hidden),self.currentPrep(input)],dim=-1))))))
+        x = self.tanh(self.meshup(self.tanh(torch.cat([self.hiddenPrep(self.hidden),self.currentPrep(input)],dim=-1))))
+        self.hidden = self.hidden+self.tanh(self.hiddenPost2(self.tanh(self.hiddenPost1(x))))
+        
         return self.hidden
 
 class RecurrentAnalyzer(nn.Module):
-    def __init__(self, recurrent_size, input_size=1, output_size=1):
+    def __init__(self, recurrent_size, inter_size, input_size=1, output_size=1):
         super(RecurrentAnalyzer, self).__init__()
-        self.rnn_cell = RCell_complex(input_size, recurrent_size)
+        self.rnn_cell = RCell_complex(input_size, inter_size, recurrent_size)
         self.regressor1 = nn.Linear(recurrent_size,recurrent_size)
         self.regressor2 = nn.Linear(recurrent_size,output_size)
         self.relu = nn.ReLU()

@@ -5,6 +5,7 @@ from torch.optim import Adam, SGD
 from torch.utils.tensorboard import SummaryWriter
 # serve command: tensorboard --logdir=runs  
 from StockDatabase import StockDatabase
+import sys
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -15,7 +16,7 @@ database.read_data()
 #print(database.stock_data.shape)
 #print(database.stock_data[:10,-10:])
 model = RecurrentAnalyzer(100).to(device)
-optimizer = SGD(model.parameters(),lr=0.05,momentum=0.1)
+optimizer = Adam(model.parameters(),lr=0.001)
 loss_fn = nn.MSELoss()
 
 minLoss = 1e9
@@ -46,7 +47,7 @@ for epoch in range(EPOCH):
         #print(model.rnn_cell.hiddenDense.weight.grad)
         lossSum+=loss.detach().item()
     lossSum/=(train_len//batch_size)
-    print(f'training epoch {epoch}/{EPOCH}; loss: {lossSum}')
+    #sys.stdout.write('training epoch '+str(epoch)+"/"+str(EPOCH)+'; loss: '+str(lossSum)+'\n')
     writer.add_scalar('Loss/train', lossSum, epoch)
     if (epoch+1) % 20 == 0:
         model.eval()
@@ -58,6 +59,6 @@ for epoch in range(EPOCH):
             if loss < minLoss:
                 minLoss = loss
                 torch.save(model.state_dict(), 'rnn_baseline')
-            print(f'evaluating epoch {epoch}/{EPOCH}; loss: {loss}')
+            #print(f'evaluating epoch {epoch}/{EPOCH}; loss: {loss}')
             writer.add_scalar('Loss/val', loss, epoch)
 
